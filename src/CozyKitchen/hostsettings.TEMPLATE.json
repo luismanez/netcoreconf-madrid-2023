@@ -1,3 +1,15 @@
 {
-
+    "Logging": {
+        "LogLevel": {
+          "Default": "Debug",
+          "System": "Warning",
+          "Microsoft": "Warning"
+        }
+    },
+    "OpenAi": {
+      "ApiEndpoint": "https://xxxxxxxxxx.openai.azure.com/",
+      "ApiKey": "",
+      "ChatModelName": "",
+      "EmbeddingsModelName": ""
+    }
 }
