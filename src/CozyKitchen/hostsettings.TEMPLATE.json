@@ -11,5 +11,9 @@
       "ApiKey": "",
       "ChatModelName": "",
       "EmbeddingsModelName": ""
+    },
+    "AzureAd": {
+      "ClientId": "",
+      "TenantId": ""
     }
 }

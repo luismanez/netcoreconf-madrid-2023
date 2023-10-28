@@ -19,7 +19,7 @@ public class SemanticFunctionWithParamsHostedService : IHostedService
         _logger = logger;
         _functions = _kernel.ImportSemanticFunctionsFromDirectory(
             PathExtensions.GetPluginsRootFolder(),
-            "LazyCornerPlugin");
+            "ResumeAssistantPlugin");
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)

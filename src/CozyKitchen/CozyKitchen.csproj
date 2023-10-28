@@ -8,9 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Identity" Version="1.10.3" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
+    <PackageReference Include="Microsoft.Graph.Beta" Version="5.53.0-preview" />
     <PackageReference Include="Microsoft.SemanticKernel" Version="1.0.0-beta3" />
   </ItemGroup>
 
@@ -18,10 +20,6 @@
     <None Update="hostsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Plugins/Native/" />
   </ItemGroup>
 
 </Project>
