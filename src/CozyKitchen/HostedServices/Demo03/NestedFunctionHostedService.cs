@@ -1,4 +1,5 @@
 using Azure.Identity;
+using CozyKitchen.Extensions;
 using CozyKitchen.Plugins.Native;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -7,33 +8,36 @@ using Microsoft.Graph.Beta;
 using Microsoft.SemanticKernel;
 
 namespace CozyKitchen.HostedServices;
-public class NativeFunctionHostedService : IHostedService
+public class NestedFunctionHostedService : IHostedService
 {
     private readonly ILogger _logger;
     private readonly IConfiguration _configuration;
     private readonly IKernel _kernel;
-
-    public NativeFunctionHostedService(
-        ILogger<NativeFunctionHostedService> logger,
+    private readonly IDictionary<string, ISKFunction> _functions;
+    public NestedFunctionHostedService(
+        ILogger<NestedFunctionHostedService> logger,
         IConfiguration configuration,
         IKernel kernel)
     {
         _logger = logger;
         _configuration = configuration;
         _kernel = kernel;
+        _functions = _kernel.ImportSemanticFunctionsFromDirectory(
+            PathExtensions.GetPluginsRootFolder(),
+            "ResumeAssistantPlugin");
     }
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         var graphClient = GetGraphServiceClient();
 
         var graphSkillsPlugin = new GraphUserProfileSkillsPlugin(graphClient);
-        var skills = _kernel.ImportFunctions(graphSkillsPlugin);
+        var graphMySkills = _kernel.ImportFunctions(graphSkillsPlugin, "GraphSkillsPlugin");
 
-        var mySkillsResult = await _kernel.RunAsync(string.Empty, skills["GetMySkills"]);
+        var mySkillsInfo = await _kernel.RunAsync(
+            _functions["MySkillsDefinition"]
+        );
 
-        var mySkills = mySkillsResult.GetValue<string>();
-
-        _logger.LogInformation($"My Skills: {mySkills}");
+        _logger.LogInformation($"-----MY SKILLS-----\n{mySkillsInfo.GetValue<string>()}");
     }
 
     private GraphServiceClient GetGraphServiceClient()

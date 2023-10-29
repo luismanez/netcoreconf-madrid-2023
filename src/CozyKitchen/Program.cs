@@ -27,9 +27,21 @@ var host = Host.CreateDefaultBuilder(args)
 
         services.AddSemanticKernelWithChatAndTextCompletions();
 
-        //services.AddHostedService<HelloSemanticWorldHostedService>();
-        //services.AddHostedService<SemanticFunctionWithParamsHostedService>();
-        services.AddHostedService<NativeFunctionHostedService>();
+        var demoToRun = args.Length > 0 ? args[0] : "1";
+
+        switch (demoToRun)
+        {
+            default:
+                services.AddHostedService<HelloSemanticWorldHostedService>();
+                break;
+            case "2":
+                services.AddHostedService<SemanticFunctionWithParamsHostedService>();
+                break;
+            case "3":
+                //services.AddHostedService<NativeFunctionHostedService>();
+                services.AddHostedService<NestedFunctionHostedService>();
+                break;
+        }
     })
     .Build();
 
