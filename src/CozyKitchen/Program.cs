@@ -41,6 +41,9 @@ var host = Host.CreateDefaultBuilder(args)
                 //services.AddHostedService<NativeFunctionHostedService>();
                 services.AddHostedService<NestedFunctionHostedService>();
                 break;
+            case "4":
+                services.AddHostedService<PlannerHostedService>();
+                break;
         }
     })
     .Build();

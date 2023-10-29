@@ -1,0 +1,11 @@
+Give me a plan for visiting: {{$City}}. I will be there for: {{$NumberOfDays}} days.
+I am more interested in food and less in places or monuments. I just need 2-3 activities per day.
++++++++++
+[DAY 1]
+ - Visit city market
+ - Take a coffee at main square
+[DAY 2]
+ -
+ -
+ -
+ +++++++++

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Azure.Identity;
 using CozyKitchen.Extensions;
 using CozyKitchen.Plugins.Native;
@@ -6,15 +7,17 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Graph.Beta;
 using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.Planners;
 
 namespace CozyKitchen.HostedServices;
-public class NestedFunctionHostedService : IHostedService
+public class PlannerHostedService : IHostedService
 {
     private readonly ILogger _logger;
     private readonly IConfiguration _configuration;
     private readonly IKernel _kernel;
     private readonly IDictionary<string, ISKFunction> _functions;
-    public NestedFunctionHostedService(
+
+    public PlannerHostedService(
         ILogger<NestedFunctionHostedService> logger,
         IConfiguration configuration,
         IKernel kernel)
@@ -24,21 +27,29 @@ public class NestedFunctionHostedService : IHostedService
         _kernel = kernel;
         _functions = _kernel.ImportSemanticFunctionsFromDirectory(
             PathExtensions.GetPluginsRootFolder(),
-            "ResumeAssistantPlugin");
+            "ResumeAssistantPlugin", "TravelAgentPlugin");
     }
+
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         var graphClient = GetGraphServiceClient();
 
-        // need to import the Native pluggin, as will be used as nested function of the main Semantic function
+        // need to import the Native pluggin, as is used as nested function of another Semantic function
         var graphSkillsPlugin = new GraphUserProfileSkillsPlugin(graphClient);
         _kernel.ImportFunctions(graphSkillsPlugin, "GraphSkillsPlugin");
 
-        var mySkillsInfo = await _kernel.RunAsync(
-            _functions["MySkillsDefinition"]
-        );
+        Console.WriteLine("How can I help:");
+        var ask = Console.ReadLine();
 
-        _logger.LogInformation($"-----MY SKILLS-----\n{mySkillsInfo.GetValue<string>()}");
+        var planner = new SequentialPlanner(_kernel);
+        var plan = await planner.CreatePlanAsync(ask!, cancellationToken: cancellationToken);
+
+        _logger.LogInformation("Plan:\n");
+        _logger.LogInformation(JsonSerializer.Serialize(plan, new JsonSerializerOptions { WriteIndented = true }));
+
+        var result = await _kernel.RunAsync(plan);
+        _logger.LogInformation("Plan results:\n");
+        _logger.LogInformation(result.GetValue<string>()!.Trim());
     }
 
     private GraphServiceClient GetGraphServiceClient()
