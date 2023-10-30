@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Graph.Beta;
 using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.Diagnostics;
 using Microsoft.SemanticKernel.Planners;
 
 namespace CozyKitchen.HostedServices;
@@ -42,14 +43,24 @@ public class PlannerHostedService : IHostedService
         var ask = Console.ReadLine();
 
         var planner = new SequentialPlanner(_kernel);
-        var plan = await planner.CreatePlanAsync(ask!, cancellationToken: cancellationToken);
 
-        _logger.LogInformation("Plan:\n");
-        _logger.LogInformation(JsonSerializer.Serialize(plan, new JsonSerializerOptions { WriteIndented = true }));
+        try
+        {
+            var plan = await planner.CreatePlanAsync(ask!, cancellationToken: cancellationToken);
+            _logger.LogInformation("Plan:\n");
+            _logger.LogInformation(JsonSerializer.Serialize(plan, new JsonSerializerOptions { WriteIndented = true }));
 
-        var result = await _kernel.RunAsync(plan);
-        _logger.LogInformation("Plan results:\n");
-        _logger.LogInformation(result.GetValue<string>()!.Trim());
+            var result = await _kernel.RunAsync(plan);
+            _logger.LogInformation("Plan results:\n");
+            _logger.LogInformation(result.GetValue<string>()!.Trim());
+        }
+        catch (SKException e)
+        {
+            // Create plan error: Not possible to create plan for goal with available functions.
+            // Goal: ...
+            // Functions: ...
+            Console.WriteLine(e.Message);
+        }
     }
 
     private GraphServiceClient GetGraphServiceClient()

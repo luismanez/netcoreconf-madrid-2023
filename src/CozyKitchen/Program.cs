@@ -25,7 +25,7 @@ var host = Host.CreateDefaultBuilder(args)
 
         services.AddLogging(configure => configure.AddConsole());
 
-        services.AddSemanticKernelWithChatAndTextCompletions();
+        services.AddSemanticKernelWithChatCompletionsAndEmbeddingGeneration();
 
         var demoToRun = args.Length > 0 ? args[0] : "1";
 
@@ -43,6 +43,12 @@ var host = Host.CreateDefaultBuilder(args)
                 break;
             case "4":
                 services.AddHostedService<PlannerHostedService>();
+                break;
+            case "5":
+                services.AddHostedService<EmbeddingGenerationHostedService>();
+                break;
+            case "6":
+                services.AddHostedService<ChatCompletionHostedService>();
                 break;
         }
     })

@@ -8,7 +8,7 @@ using Microsoft.SemanticKernel;
 namespace CozyKitchen.Extensions;
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddSemanticKernelWithChatAndTextCompletions(
+    public static IServiceCollection AddSemanticKernelWithChatCompletionsAndEmbeddingGeneration(
         this IServiceCollection services)
     {
         var serviceProvider = services.BuildServiceProvider();
@@ -25,7 +25,7 @@ public static class ServiceCollectionExtensions
             )
             .WithAzureTextEmbeddingGenerationService(
                 endpoint: openAiOptions.ApiEndpoint,
-                deploymentName: openAiOptions.ChatModelName,
+                deploymentName: openAiOptions.EmbeddingsModelName,
                 apiKey: openAiOptions.ApiKey
             )
             .Build();
