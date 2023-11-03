@@ -400,3 +400,4 @@ FodyWeavers.xsd
 # Luisman
 src/CozyKitchen/hostsettings.json
 .DS_Store
+src/CozyKitchen/HostedServices/Demo07/output_sample.json

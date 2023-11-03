@@ -8,15 +8,18 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Graph.Beta;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Diagnostics;
+using Microsoft.SemanticKernel.Events;
 using Microsoft.SemanticKernel.Planners;
 
 namespace CozyKitchen.HostedServices;
-public class PlannerHostedService : IHostedService
+public class FunctionHooksHostedService : IHostedService
 {
     private readonly ILogger _logger;
     private readonly IConfiguration _configuration;
     private readonly IKernel _kernel;
-    public PlannerHostedService(
+
+    public FunctionHooksHostedService(
+
         ILogger<NestedFunctionHostedService> logger,
         IConfiguration configuration,
         IKernel kernel)
@@ -27,6 +30,15 @@ public class PlannerHostedService : IHostedService
         _kernel.ImportSemanticFunctionsFromDirectory(
             PathExtensions.GetPluginsRootFolder(),
             "ResumeAssistantPlugin", "TravelAgentPlugin");
+
+        // hooks init
+        kernel.FunctionInvoking += (object? sender, FunctionInvokingEventArgs e) => {
+            _logger.LogInformation($"Function invoking... {e.FunctionView.Name}. {e.FunctionView.PluginName}. SKContext.Result: {e.SKContext.Result}");
+        };
+
+        kernel.FunctionInvoked += (object? sender, FunctionInvokedEventArgs e) => {
+            _logger.LogInformation($"Function invoked... {e.FunctionView.Name}. {e.FunctionView.PluginName}. SKContext.Result: {e.SKContext.Result}");
+        };
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -51,6 +63,7 @@ public class PlannerHostedService : IHostedService
             var result = await _kernel.RunAsync(plan);
             _logger.LogInformation("Plan results:\n");
             _logger.LogInformation(result.GetValue<string>()!.Trim());
+            _logger.LogInformation("======================================");
         }
         catch (SKException e)
         {

@@ -50,6 +50,9 @@ var host = Host.CreateDefaultBuilder(args)
             case "6":
                 services.AddHostedService<ChatCompletionHostedService>();
                 break;
+            case "7":
+                services.AddHostedService<FunctionHooksHostedService>();
+                break;
         }
     })
     .Build();
