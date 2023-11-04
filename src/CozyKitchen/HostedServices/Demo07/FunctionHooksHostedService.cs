@@ -31,12 +31,22 @@ public class FunctionHooksHostedService : IHostedService
             PathExtensions.GetPluginsRootFolder(),
             "ResumeAssistantPlugin", "TravelAgentPlugin");
 
-        // hooks init
-        kernel.FunctionInvoking += (object? sender, FunctionInvokingEventArgs e) => {
+        // https://devblogs.microsoft.com/semantic-kernel/supercharge-your-semantic-kernel-experience-unleashing-the-power-of-pre-and-post-hooks/#:~:text=Pre%20and%20post%20hooks%20provide%20developers%20with%20a,possibilities%20for%20customization%20and%20fine-tuning%20of%20application%20behavior
+        // Get: Access the SKContextobject before function execution.
+        // Set: Modify the SKContextvariables based on specific conditions.
+        // Set: Skip the next RunAsyncfunction in the pipeline.
+        // Set: Cancel further RunAsyncfunction executions.
+        kernel.FunctionInvoking += (object? sender, FunctionInvokingEventArgs e) =>
+        {
             _logger.LogInformation($"Function invoking... {e.FunctionView.Name}. {e.FunctionView.PluginName}. SKContext.Result: {e.SKContext.Result}");
         };
 
-        kernel.FunctionInvoked += (object? sender, FunctionInvokedEventArgs e) => {
+        // Get: Access the SKContextobject after function execution.
+        // Set: Modify the SKContextvariables based on the results of function execution.
+        // Set: Repeat RunAsync function execution.
+        // Set: Cancel further RunAsyncfunction executions if required.
+        kernel.FunctionInvoked += (object? sender, FunctionInvokedEventArgs e) =>
+        {
             _logger.LogInformation($"Function invoked... {e.FunctionView.Name}. {e.FunctionView.PluginName}. SKContext.Result: {e.SKContext.Result}");
         };
     }
