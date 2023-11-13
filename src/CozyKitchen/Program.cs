@@ -27,6 +27,8 @@ var host = Host.CreateDefaultBuilder(args)
 
         services.AddSemanticKernelWithChatCompletionsAndEmbeddingGeneration();
 
+        services.AddHttpClient();
+
         var demoToRun = args.Length > 0 ? args[0] : "1";
 
         switch (demoToRun)
@@ -52,6 +54,9 @@ var host = Host.CreateDefaultBuilder(args)
                 break;
             case "7":
                 services.AddHostedService<FunctionHooksHostedService>();
+                break;
+            case "8":
+                services.AddHostedService<FunctionCallingHostedService>();
                 break;
         }
     })

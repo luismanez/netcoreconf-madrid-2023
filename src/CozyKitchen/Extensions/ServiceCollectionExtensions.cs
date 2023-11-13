@@ -18,12 +18,12 @@ public static class ServiceCollectionExtensions
 
         var kernel = new KernelBuilder()
             .WithLoggerFactory(loggerFactory!)
-            .WithAzureChatCompletionService(
+            .WithAzureOpenAIChatCompletionService(
                 endpoint: openAiOptions.ApiEndpoint,
                 deploymentName: openAiOptions.ChatModelName,
                 apiKey: openAiOptions.ApiKey
             )
-            .WithAzureTextEmbeddingGenerationService(
+            .WithAzureOpenAITextEmbeddingGenerationService(
                 endpoint: openAiOptions.ApiEndpoint,
                 deploymentName: openAiOptions.EmbeddingsModelName,
                 apiKey: openAiOptions.ApiKey
