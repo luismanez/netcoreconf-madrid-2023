@@ -1,10 +1,6 @@
-using System.Numerics;
-using System.Security.AccessControl;
-using System.Collections;
 using System.ComponentModel;
 using Microsoft.Graph.Beta;
 using Microsoft.SemanticKernel;
-using System.Data.Common;
 
 namespace CozyKitchen.Plugins.Native;
 public class GraphUserProfileSkillsPlugin
