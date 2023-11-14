@@ -47,51 +47,69 @@ public class FunctionCallingHostedService : IHostedService
         var chatCompletion = _kernel.GetService<IChatCompletion>();
         var chatHistory = chatCompletion.CreateNewChat();
 
-        Console.WriteLine("How can I help:");
-        var ask = Console.ReadLine();
-
-        chatHistory.AddUserMessage(ask!);
-
-        var chatResult = (await chatCompletion.GetChatCompletionsAsync(chatHistory, requestSettings))[0];
-
-        var chatMessage = await chatResult.GetChatMessageAsync();
-        if (!string.IsNullOrEmpty(chatMessage.Content))
+        while (true)
         {
-            Console.WriteLine(chatMessage.Content);
-        }
+            Console.WriteLine("How can I help: (type 'exit' to finish)");
+            var ask = Console.ReadLine();
 
-        // Check for function response
-        OpenAIFunctionResponse? functionResponse = chatResult.GetOpenAIFunctionResponse();
-        if (functionResponse is not null)
-        {
-            // Print function response details
-            Console.WriteLine("Function name: " + functionResponse.FunctionName);
-            Console.WriteLine("Plugin name: " + functionResponse.PluginName);
-            Console.WriteLine("Arguments: ");
-            foreach (var parameter in functionResponse.Parameters)
+            if (ask!.Equals("exit", StringComparison.CurrentCultureIgnoreCase))
             {
-                Console.WriteLine($"- {parameter.Key}: {parameter.Value}");
+                Console.WriteLine("... Chat closed. CTRL+C to exit program ...");
+                break;
             }
 
-            // If the function returned by OpenAI is an SKFunction registered with the kernel,
-            // you can invoke it using the following code.
-            if (_kernel.Functions.TryGetFunctionAndContext(
-                functionResponse,
-                out ISKFunction? func,
-                out ContextVariables? context))
+            chatHistory.AddUserMessage(ask!);
+
+            var chatResult = (await chatCompletion.GetChatCompletionsAsync(chatHistory, requestSettings))[0];
+
+            var chatMessage = await chatResult.GetChatMessageAsync();
+            if (!string.IsNullOrEmpty(chatMessage.Content))
             {
-                var kernelResult = await _kernel.RunAsync(func, context, cancellationToken: cancellationToken);
+                Console.WriteLine();
+                Console.WriteLine(chatMessage.Content);
+                Console.WriteLine();
+            }
 
-                var resultMessage = kernelResult.GetValue<string>();
-
-                if (!string.IsNullOrEmpty(resultMessage))
+            // Check for function response
+            var functionResponse = chatResult.GetOpenAIFunctionResponse();
+            if (functionResponse is not null)
+            {
+                // Print function response details
+                Console.WriteLine("Function name: " + functionResponse.FunctionName);
+                Console.WriteLine("Plugin name: " + functionResponse.PluginName);
+                Console.WriteLine("Arguments: ");
+                foreach (var parameter in functionResponse.Parameters)
                 {
-                    Console.WriteLine(resultMessage);
+                    Console.WriteLine($"- {parameter.Key}: {parameter.Value}");
                 }
-            }
-            else
-            {
-                Console.WriteLine($"Error: Function {functionResponse.PluginName}.{functionResponse.FunctionName} not found.");
+
+                // If the function returned by OpenAI is an SKFunction registered with the kernel,
+                // you can invoke it using the following code.
+                if (_kernel.Functions.TryGetFunctionAndContext(
+                    functionResponse,
+                    out ISKFunction? func,
+                    out ContextVariables? context))
+                {
+                    var kernelResult = await _kernel.RunAsync(func, context, cancellationToken: cancellationToken);
+
+                    var resultMessage = kernelResult.GetValue<string>();
+
+                    if (!string.IsNullOrEmpty(resultMessage))
+                    {
+                        chatHistory.AddAssistantMessage(resultMessage);
+                        Console.WriteLine();
+                        Console.WriteLine(resultMessage);
+                        Console.WriteLine();
+                    }
+                    else
+                    {
+                        Console.WriteLine("Result from Plugin not available... shoul not happen :)");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"Error: Function {functionResponse.PluginName}.{functionResponse.FunctionName} not found.");
+                }
             }
         }
     }
