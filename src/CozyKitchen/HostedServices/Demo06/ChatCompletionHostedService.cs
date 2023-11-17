@@ -16,8 +16,8 @@ public class ChatCompletionHostedService : IHostedService
     {
         _chatCompletion = kernel.GetService<IChatCompletion>();
         _logger = logger;
-
     }
+
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         var chat = _chatCompletion.CreateNewChat("You are an AI willing to help");
